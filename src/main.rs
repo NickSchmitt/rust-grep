@@ -1,5 +1,10 @@
-use structopt::StructOpt;
+#![feature(option_result_contains)]
 
+use structopt::StructOpt;
+use std::io::prelude::*;
+use std::io::BufReader;
+use std::fs::File;
+use std::io::Result;
 #[derive(StructOpt, Debug)]
 struct Cli {
     /// The pattern to look for
@@ -10,14 +15,16 @@ struct Cli {
 }
 
 
-fn main() {
+fn main() -> Result<()> {
     let args = Cli::from_args();
-    let content = std::fs::read_to_string(&args.path)
-        .expect("could not read file");
-    for line in content.lines() {
+    let content = File::open(&args.path).expect("Unable to open");
+    let reader = BufReader::new(content);
+    
+    for line in reader.lines() {
         if line.contains(&args.pattern) {
-            println!("{}", line);
+            println!("{:?}", line);
         }
     }
+    Ok(())
 }
 
